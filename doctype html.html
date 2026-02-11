@@ -1,0 +1,318 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:DengXian;
+	panose-1:2 1 6 0 3 1 1 1 1 1;}
+@font-face
+	{font-family:Aptos;
+	panose-1:2 11 0 4 2 2 2 2 2 4;}
+@font-face
+	{font-family:"\@DengXian";
+	panose-1:2 1 6 0 3 1 1 1 1 1;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:8.0pt;
+	margin-left:0cm;
+	line-height:115%;
+	font-size:12.0pt;
+	font-family:"Aptos",sans-serif;}
+.MsoChpDefault
+	{font-family:"Aptos",sans-serif;}
+.MsoPapDefault
+	{margin-bottom:8.0pt;
+	line-height:115%;}
+@page WordSection1
+	{size:595.3pt 841.9pt;
+	margin:72.0pt 72.0pt 72.0pt 72.0pt;}
+div.WordSection1
+	{page:WordSection1;}
+-->
+</style>
+
+</head>
+
+<body lang=en-FR style='word-wrap:break-word'>
+
+<div class=WordSection1>
+
+<p class=MsoNormal>&lt;!DOCTYPE html&gt;</p>
+
+<p class=MsoNormal>&lt;html lang=&quot;zh-CN&quot;&gt;</p>
+
+<p class=MsoNormal>&lt;head&gt;</p>
+
+<p class=MsoNormal>    &lt;meta charset=&quot;UTF-8&quot;&gt;</p>
+
+<p class=MsoNormal>    &lt;meta name=&quot;viewport&quot;
+content=&quot;width=device-width, initial-scale=1.0&quot;&gt;</p>
+
+<p class=MsoNormal>    &lt;title&gt;HSK 1 <span lang=ZH-CN style='font-family:
+DengXian'>词汇挑战</span>&lt;/title&gt;</p>
+
+<p class=MsoNormal>    &lt;style&gt;</p>
+
+<p class=MsoNormal>        :root { --primary: #6c5ce7; --success: #00b894;
+--bg: #f0f2f5; }</p>
+
+<p class=MsoNormal>        body { font-family: 'Segoe UI', Tahoma, Geneva,
+Verdana, sans-serif; background: var(--bg); display: flex; flex-direction:
+column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }</p>
+
+<p class=MsoNormal>        h1 { color: #2d3436; margin-bottom: 10px; }</p>
+
+<p class=MsoNormal>        .stats { margin-bottom: 20px; font-size: 1.2rem;
+color: #636e72; }</p>
+
+<p class=MsoNormal>        .grid { display: grid; grid-template-columns:
+repeat(4, 1fr); gap: 12px; max-width: 500px; width: 100%; }</p>
+
+<p class=MsoNormal>        .card { height: 100px; background: white;
+border-radius: 12px; display: flex; align-items: center; justify-content:
+center; font-size: 1.5rem; font-weight: bold; cursor: pointer; transition:
+transform 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+position: relative; transform-style: preserve-3d; }</p>
+
+<p class=MsoNormal>        .card:hover { transform: translateY(-5px);
+box-shadow: 0 8px 15px rgba(0,0,0,0.1); }</p>
+
+<p class=MsoNormal>        .card.flipped { transform: rotateY(180deg);
+background: var(--primary); color: white; }</p>
+
+<p class=MsoNormal>        .card.matched { background: var(--success)
+!important; color: white; visibility: hidden; opacity: 0; transition: all 0.5s;
+}</p>
+
+<p class=MsoNormal>        .card span { pointer-events: none; }</p>
+
+<p class=MsoNormal>    &lt;/style&gt;</p>
+
+<p class=MsoNormal>&lt;/head&gt;</p>
+
+<p class=MsoNormal>&lt;body&gt;</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>    &lt;h1&gt;HSK 1 <span lang=ZH-CN style='font-family:
+DengXian'>记忆挑战</span>&lt;/h1&gt;</p>
+
+<p class=MsoNormal>    &lt;div class=&quot;stats&quot;&gt;<span lang=ZH-CN
+style='font-family:DengXian'>得分</span>: &lt;span
+id=&quot;score&quot;&gt;0&lt;/span&gt; | <span lang=ZH-CN style='font-family:
+DengXian'>尝试</span>: &lt;span
+id=&quot;attempts&quot;&gt;0&lt;/span&gt;&lt;/div&gt;</p>
+
+<p class=MsoNormal>    </p>
+
+<p class=MsoNormal>    &lt;div class=&quot;grid&quot;
+id=&quot;game-grid&quot;&gt;&lt;/div&gt;</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>    &lt;script&gt;</p>
+
+<p class=MsoNormal>        // HSK 1 <span lang=ZH-CN style='font-family:DengXian'>词汇数据</span>
+(<span lang=ZH-CN style='font-family:DengXian'>汉字与拼音配对</span>)</p>
+
+<p class=MsoNormal>        const vocabulary = [</p>
+
+<p class=MsoNormal>            { h: '<span lang=ZH-CN style='font-family:DengXian'>老师</span>',
+p: 'l<span lang=ZH-CN style='font-family:DengXian'>ǎ</span>osh<span lang=ZH-CN
+style='font-family:DengXian'>ī</span>' }, { h: '<span lang=ZH-CN
+style='font-family:DengXian'>学生</span>', p: 'xu<span lang=ZH-CN
+style='font-family:DengXian'>é</span>sheng' },</p>
+
+<p class=MsoNormal>            { h: '<span lang=ZH-CN style='font-family:DengXian'>苹果</span>',
+p: 'p<span lang=ZH-CN style='font-family:DengXian'>í</span>nggu<span
+lang=ZH-CN style='font-family:DengXian'>ǒ</span>' }, { h: '<span lang=ZH-CN
+style='font-family:DengXian'>喝水</span>', p: 'h<span lang=ZH-CN
+style='font-family:DengXian'>ē</span> shu<span lang=ZH-CN style='font-family:
+DengXian'>ǐ</span>' },</p>
+
+<p class=MsoNormal>            { h: '<span lang=ZH-CN style='font-family:DengXian'>猫</span>',
+p: 'm<span lang=ZH-CN style='font-family:DengXian'>ā</span>o' }, { h: '<span
+lang=ZH-CN style='font-family:DengXian'>医生</span>', p: 'y<span lang=ZH-CN
+style='font-family:DengXian'>ī</span>sh<span lang=ZH-CN style='font-family:
+DengXian'>ē</span>ng' },</p>
+
+<p class=MsoNormal>            { h: '<span lang=ZH-CN style='font-family:DengXian'>谢谢</span>',
+p: 'xi<span lang=ZH-CN style='font-family:DengXian'>è</span>xie' }, { h: '<span
+lang=ZH-CN style='font-family:DengXian'>再见</span>', p: 'z<span lang=ZH-CN
+style='font-family:DengXian'>à</span>iji<span lang=ZH-CN style='font-family:
+DengXian'>à</span>n' }</p>
+
+<p class=MsoNormal>        ];</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>        let cards = [];</p>
+
+<p class=MsoNormal>        vocabulary.forEach(item =&gt; {</p>
+
+<p class=MsoNormal>            cards.push({ text: item.h, matchId: item.h });</p>
+
+<p class=MsoNormal>            cards.push({ text: item.p, matchId: item.h });</p>
+
+<p class=MsoNormal>        });</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>        // <span lang=ZH-CN style='font-family:DengXian'>洗牌</span></p>
+
+<p class=MsoNormal>        cards.sort(() =&gt; Math.random() - 0.5);</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>        const grid = document.getElementById('game-grid');</p>
+
+<p class=MsoNormal>        let flippedCards = [];</p>
+
+<p class=MsoNormal>        let score = 0;</p>
+
+<p class=MsoNormal>        let attempts = 0;</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>        function createBoard() {</p>
+
+<p class=MsoNormal>            cards.forEach((card, index) =&gt; {</p>
+
+<p class=MsoNormal>                const cardEl =
+document.createElement('div');</p>
+
+<p class=MsoNormal>                cardEl.classList.add('card');</p>
+
+<p class=MsoNormal>                cardEl.dataset.index = index;</p>
+
+<p class=MsoNormal>                cardEl.innerHTML =
+`&lt;span&gt;?&lt;/span&gt;`;</p>
+
+<p class=MsoNormal>                cardEl.onclick = () =&gt; flipCard(cardEl,
+card);</p>
+
+<p class=MsoNormal>                grid.appendChild(cardEl);</p>
+
+<p class=MsoNormal>            });</p>
+
+<p class=MsoNormal>        }</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>        function flipCard(el, card) {</p>
+
+<p class=MsoNormal>            if (flippedCards.length &lt; 2 &amp;&amp;
+!el.classList.contains('flipped')) {</p>
+
+<p class=MsoNormal>                el.classList.add('flipped');</p>
+
+<p class=MsoNormal>                el.innerHTML =
+`&lt;span&gt;${card.text}&lt;/span&gt;`;</p>
+
+<p class=MsoNormal>                flippedCards.push({ el, card });</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>                if (flippedCards.length === 2) {</p>
+
+<p class=MsoNormal>                    attempts++;</p>
+
+<p class=MsoNormal>                   
+document.getElementById('attempts').innerText = attempts;</p>
+
+<p class=MsoNormal>                    checkMatch();</p>
+
+<p class=MsoNormal>                }</p>
+
+<p class=MsoNormal>            }</p>
+
+<p class=MsoNormal>        }</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>        function checkMatch() {</p>
+
+<p class=MsoNormal>            const [c1, c2] = flippedCards;</p>
+
+<p class=MsoNormal>            if (c1.card.matchId === c2.card.matchId) {</p>
+
+<p class=MsoNormal>                score++;</p>
+
+<p class=MsoNormal>                document.getElementById('score').innerText =
+score;</p>
+
+<p class=MsoNormal>                // <span lang=ZH-CN style='font-family:DengXian'>播放发音</span></p>
+
+<p class=MsoNormal>                speak(c1.card.matchId);</p>
+
+<p class=MsoNormal>                setTimeout(() =&gt; {</p>
+
+<p class=MsoNormal>                    c1.el.classList.add('matched');</p>
+
+<p class=MsoNormal>                    c2.el.classList.add('matched');</p>
+
+<p class=MsoNormal>                    flippedCards = [];</p>
+
+<p class=MsoNormal>                    if (score === vocabulary.length) alert('<span
+lang=ZH-CN style='font-family:DengXian'>太棒了！你完成了挑战！</span>');</p>
+
+<p class=MsoNormal>                }, 600);</p>
+
+<p class=MsoNormal>            } else {</p>
+
+<p class=MsoNormal>                setTimeout(() =&gt; {</p>
+
+<p class=MsoNormal>                    c1.el.classList.remove('flipped');</p>
+
+<p class=MsoNormal>                    c2.el.classList.remove('flipped');</p>
+
+<p class=MsoNormal>                    c1.el.innerHTML =
+`&lt;span&gt;?&lt;/span&gt;`;</p>
+
+<p class=MsoNormal>                    c2.el.innerHTML =
+`&lt;span&gt;?&lt;/span&gt;`;</p>
+
+<p class=MsoNormal>                    flippedCards = [];</p>
+
+<p class=MsoNormal>                }, 1000);</p>
+
+<p class=MsoNormal>            }</p>
+
+<p class=MsoNormal>        }</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>        function speak(text) {</p>
+
+<p class=MsoNormal>            const msg = new SpeechSynthesisUtterance(text);</p>
+
+<p class=MsoNormal>            msg.lang = 'zh-CN';</p>
+
+<p class=MsoNormal>            window.speechSynthesis.speak(msg);</p>
+
+<p class=MsoNormal>        }</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>        createBoard();</p>
+
+<p class=MsoNormal>    &lt;/script&gt;</p>
+
+<p class=MsoNormal>&lt;/body&gt;</p>
+
+<p class=MsoNormal>&lt;/html&gt;</p>
+
+</div>
+
+</body>
+
+</html>
