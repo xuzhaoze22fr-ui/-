@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSK 1 词汇挑战</title>
+    <style>
+        :root { --primary: #6c5ce7; --success: #00b894; --bg: #f0f2f5; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        h1 { color: #2d3436; margin-bottom: 10px; }
+        .stats { margin-bottom: 20px; font-size: 1.2rem; color: #636e72; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; max-width: 500px; width: 100%; }
+        .card { height: 100px; background: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; transform-style: preserve-3d; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+        .card.flipped { transform: rotateY(180deg); background: var(--primary); color: white; }
+        .card.matched { background: var(--success) !important; color: white; visibility: hidden; opacity: 0; transition: all 0.5s; }
+        .card span { pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <h1>HSK 1 记忆挑战</h1>
+    <div class="stats">得分: <span id="score">0</span> | 尝试: <span id="attempts">0</span></div>
+    
+    <div class="grid" id="game-grid"></div>
+
+    <script>
+        // HSK 1 词汇数据 (汉字与拼音配对)
+        const vocabulary = [
+            { h: '老师', p: 'lǎoshī' }, { h: '学生', p: 'xuésheng' },
+            { h: '苹果', p: 'píngguǒ' }, { h: '喝水', p: 'hē shuǐ' },
+            { h: '猫', p: 'māo' }, { h: '医生', p: 'yīshēng' },
+            { h: '谢谢', p: 'xièxie' }, { h: '再见', p: 'zàijiàn' }
+        ];
+
+        let cards = [];
+        vocabulary.forEach(item => {
+            cards.push({ text: item.h, matchId: item.h });
+            cards.push({ text: item.p, matchId: item.h });
+        });
+
+        // 洗牌
+        cards.sort(() => Math.random() - 0.5);
+
+        const grid = document.getElementById('game-grid');
+        let flippedCards = [];
+        let score = 0;
+        let attempts = 0;
+
+        function createBoard() {
+            cards.forEach((card, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.classList.add('card');
+                cardEl.dataset.index = index;
+                cardEl.innerHTML = `<span>?</span>`;
+                cardEl.onclick = () => flipCard(cardEl, card);
+                grid.appendChild(cardEl);
+            });
+        }
+
+        function flipCard(el, card) {
+            if (flippedCards.length < 2 && !el.classList.contains('flipped')) {
+                el.classList.add('flipped');
+                el.innerHTML = `<span>${card.text}</span>`;
+                flippedCards.push({ el, card });
+
+                if (flippedCards.length === 2) {
+                    attempts++;
+                    document.getElementById('attempts').innerText = attempts;
+                    checkMatch();
+                }
+            }
+        }
+
+        function checkMatch() {
+            const [c1, c2] = flippedCards;
+            if (c1.card.matchId === c2.card.matchId) {
+                score++;
+                document.getElementById('score').innerText = score;
+                // 播放发音
+                speak(c1.card.matchId);
+                setTimeout(() => {
+                    c1.el.classList.add('matched');
+                    c2.el.classList.add('matched');
+                    flippedCards = [];
+                    if (score === vocabulary.length) alert('太棒了！你完成了挑战！');
+                }, 600);
+            } else {
+                setTimeout(() => {
+                    c1.el.classList.remove('flipped');
+                    c2.el.classList.remove('flipped');
+                    c1.el.innerHTML = `<span>?</span>`;
+                    c2.el.innerHTML = `<span>?</span>`;
+                    flippedCards = [];
+                }, 1000);
+            }
+        }
+
+        function speak(text) {
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.lang = 'zh-CN';
+            window.speechSynthesis.speak(msg);
+        }
+
+        createBoard();
+    </script>
+</body>
+</html>
