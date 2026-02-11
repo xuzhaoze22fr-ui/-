@@ -1,108 +1,1005 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HSK 1 词汇挑战</title>
-    <style>
-        :root { --primary: #6c5ce7; --success: #00b894; --bg: #f0f2f5; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
-        h1 { color: #2d3436; margin-bottom: 10px; }
-        .stats { margin-bottom: 20px; font-size: 1.2rem; color: #636e72; }
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; max-width: 500px; width: 100%; }
-        .card { height: 100px; background: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; transform-style: preserve-3d; }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
-        .card.flipped { transform: rotateY(180deg); background: var(--primary); color: white; }
-        .card.matched { background: var(--success) !important; color: white; visibility: hidden; opacity: 0; transition: all 0.5s; }
-        .card span { pointer-events: none; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HSK1 写字 & 词汇练习</title>
+  <style>
+    :root{
+      --bg:#0b0f19;
+      --card:#111a2b;
+      --card2:#0f1526;
+      --text:#e8eefc;
+      --muted:#aab7d6;
+      --line:rgba(255,255,255,.12);
+      --brand:#7aa2ff;
+      --brand2:#6ee7ff;
+      --ok:#34d399;
+      --bad:#fb7185;
+      --radius:18px;
+      --shadow:0 16px 40px rgba(0,0,0,.45);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background:
+        radial-gradient(1100px 500px at 18% 10%, rgba(122,162,255,.20), transparent 55%),
+        radial-gradient(900px 500px at 85% 25%, rgba(110,231,255,.16), transparent 60%),
+        var(--bg);
+      color:var(--text);
+    }
+    .container{max-width:1120px; margin:0 auto; padding:22px;}
+    .top{
+      display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+      padding:14px 16px;
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(17,26,43,.75);
+      box-shadow: var(--shadow);
+    }
+    .brand{display:flex; align-items:center; gap:10px; font-weight:900;}
+    .logo{width:34px; height:34px; border-radius:12px; background:linear-gradient(135deg, var(--brand), var(--brand2));}
+    .muted{color:var(--muted)}
+    .pill{
+      padding:8px 12px; border:1px solid var(--line);
+      border-radius:999px; background: rgba(255,255,255,.03);
+      color:var(--muted); cursor:pointer; font-size:13px;
+      transition: all .15s ease;
+      user-select:none;
+    }
+    .pill:hover{transform: translateY(-1px); border-color: rgba(122,162,255,.55); color:var(--text);}
+    .pill.active{border-color: rgba(122,162,255,.60); color:var(--text);}
+    .grid{display:grid; gap:14px; margin-top:16px; grid-template-columns: 1fr 1fr;}
+    @media (max-width: 980px){ .grid{grid-template-columns: 1fr;} }
+    .card{
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(17,26,43,.70);
+      box-shadow: var(--shadow);
+      padding:16px;
+    }
+    h1{font-size:18px; margin:0;}
+    h2{font-size:16px; margin:0 0 10px;}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    select, input[type="text"], textarea{
+      width:100%;
+      padding:10px 12px; border-radius:12px; border:1px solid var(--line);
+      background: rgba(11,15,25,.60); color:var(--text); outline:none;
+    }
+    textarea{min-height:130px; resize:vertical;}
+    select:focus, input:focus, textarea:focus{border-color: rgba(122,162,255,.70);}
+    .btn{
+      padding:10px 12px; border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      cursor:pointer; font-weight:700;
+      transition: all .15s ease;
+    }
+    .btn:hover{transform: translateY(-1px); border-color: rgba(122,162,255,.55);}
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(122,162,255,.95), rgba(110,231,255,.95));
+      color:#071022; border-color: transparent;
+    }
+    .btn.danger{border-color: rgba(251,113,133,.55);}
+    .btn.ok{border-color: rgba(52,211,153,.55);}
+    .split{display:grid; gap:12px; grid-template-columns: 1fr 1fr;}
+    @media (max-width: 680px){ .split{grid-template-columns: 1fr;} }
+
+    /* Flashcard */
+    .flash{
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.03);
+      padding:14px;
+    }
+    .bigHan{font-size:54px; font-weight:900; line-height:1; margin:4px 0;}
+    .small{font-size:14px; color:var(--muted); line-height:1.6;}
+    .meta{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;}
+    .chip{
+      font-size:12px; padding:6px 10px; border-radius:999px;
+      border:1px solid var(--line); color:var(--muted);
+    }
+
+    /* Drawing pad */
+    .padWrap{
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      overflow:hidden;
+      background: rgba(255,255,255,.03);
+    }
+    .padTop{
+      display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
+      padding:10px;
+      border-bottom:1px solid var(--line);
+      background: rgba(255,255,255,.02);
+    }
+    .padTop label{font-size:12px; color:var(--muted);}
+    .padTop input[type="range"]{width:140px;}
+    canvas{display:block; width:100%; height:380px; touch-action:none; background: #0a1020;}
+    .hint{
+      font-size:12px; color:var(--muted); margin-top:10px;
+    }
+
+    /* Quiz */
+    .qBox{
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.03);
+      padding:14px;
+    }
+    .opt{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px 12px;
+      background: rgba(255,255,255,.02);
+      cursor:pointer;
+      margin-top:10px;
+      transition: all .12s ease;
+    }
+    .opt:hover{transform: translateY(-1px); border-color: rgba(122,162,255,.55);}
+    .opt.good{border-color: rgba(52,211,153,.65);}
+    .opt.bad{border-color: rgba(251,113,133,.65);}
+    .score{
+      display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+      margin-top:10px; color:var(--muted); font-size:13px;
+    }
+    .kbd{border:1px solid var(--line); border-bottom-width:2px; padding:2px 6px; border-radius:8px; color:var(--muted); font-size:12px;}
+    .footer{margin:14px 0 30px; color:var(--muted); font-size:13px;}
+    .hidden{display:none !important;}
+  </style>
 </head>
 <body>
+  <div class="container">
+    <div class="top">
+      <div class="brand">
+        <div class="logo"></div>
+        <div>
+          <div style="font-size:14px;">HSK1 写字 & 词汇练习</div>
+          <div class="muted" style="font-size:12px;">Flashcards · 默写 · 练字板 · 小测验</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="pill active" data-view="vocab">词汇卡</div>
+        <div class="pill" data-view="dictation">默写</div>
+        <div class="pill" data-view="writing">写字板</div>
+        <div class="pill" data-view="quiz">测验</div>
+        <div class="pill" data-view="custom">自定义词库</div>
+      </div>
+    </div>
 
-    <h1>HSK 1 记忆挑战</h1>
-    <div class="stats">得分: <span id="score">0</span> | 尝试: <span id="attempts">0</span></div>
-    
-    <div class="grid" id="game-grid"></div>
+    <div class="grid">
+      <!-- Left: main -->
+      <div class="card" id="mainCard">
+        <!-- Views rendered here -->
+      </div>
 
-    <script>
-        // HSK 1 词汇数据 (汉字与拼音配对)
-        const vocabulary = [
-            { h: '老师', p: 'lǎoshī' }, { h: '学生', p: 'xuésheng' },
-            { h: '苹果', p: 'píngguǒ' }, { h: '喝水', p: 'hē shuǐ' },
-            { h: '猫', p: 'māo' }, { h: '医生', p: 'yīshēng' },
-            { h: '谢谢', p: 'xièxie' }, { h: '再见', p: 'zàijiàn' }
-        ];
+      <!-- Right: controls / print -->
+      <div class="card">
+        <h2>⚙️ 设置</h2>
+        <div class="split">
+          <div>
+            <div class="muted" style="font-size:12px; margin-bottom:6px;">词库</div>
+            <select id="deckSelect"></select>
+          </div>
+          <div>
+            <div class="muted" style="font-size:12px; margin-bottom:6px;">筛选</div>
+            <input id="search" type="text" placeholder="搜索：中文 / 拼音 / 英文…" />
+          </div>
+        </div>
 
-        let cards = [];
-        vocabulary.forEach(item => {
-            cards.push({ text: item.h, matchId: item.h });
-            cards.push({ text: item.p, matchId: item.h });
-        });
+        <div class="row" style="margin-top:12px;">
+          <button class="btn" id="togglePinyin">👀 拼音：显示</button>
+          <button class="btn" id="toggleEnglish">👀 英文：显示</button>
+          <button class="btn" id="shuffle">🔀 打乱</button>
+          <button class="btn ok" id="reset">↩️ 重置</button>
+        </div>
 
-        // 洗牌
-        cards.sort(() => Math.random() - 0.5);
+        <div style="margin-top:14px;">
+          <h2>🖨 打印练字纸</h2>
+          <p class="muted" style="margin:0 0 10px; font-size:13px;">
+            会打开一个新窗口：每个词一行 + 多个空格，用来写字/默写。
+          </p>
+          <div class="row">
+            <button class="btn primary" id="printSheet">打印 A4</button>
+            <select id="repeatCount" style="max-width:180px;">
+              <option value="6">每行 6 个格</option>
+              <option value="8">每行 8 个格</option>
+              <option value="10">每行 10 个格</option>
+            </select>
+          </div>
+        </div>
 
-        const grid = document.getElementById('game-grid');
-        let flippedCards = [];
-        let score = 0;
-        let attempts = 0;
+        <div class="footer">
+          <div>快捷键：<span class="kbd">←</span>/<span class="kbd">→</span> 切换词，<span class="kbd">Space</span> 翻面（在词汇卡/默写里）</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        function createBoard() {
-            cards.forEach((card, index) => {
-                const cardEl = document.createElement('div');
-                cardEl.classList.add('card');
-                cardEl.dataset.index = index;
-                cardEl.innerHTML = `<span>?</span>`;
-                cardEl.onclick = () => flipCard(cardEl, card);
-                grid.appendChild(cardEl);
-            });
-        }
+<script>
+/** ======================
+ *  HSK1 Demo Decks
+ *  你可以把它换成你课堂的词
+ *  format: {han, pinyin, en}
+ * ====================== */
+const DECKS = {
+  "HSK1 基础（示例 40）": [
+    {han:"我", pinyin:"wǒ", en:"I / me"},
+    {han:"你", pinyin:"nǐ", en:"you"},
+    {han:"他", pinyin:"tā", en:"he / him"},
+    {han:"她", pinyin:"tā", en:"she / her"},
+    {han:"我们", pinyin:"wǒmen", en:"we"},
+    {han:"这", pinyin:"zhè", en:"this"},
+    {han:"那", pinyin:"nà", en:"that"},
+    {han:"哪", pinyin:"nǎ", en:"which / where"},
+    {han:"不", pinyin:"bù", en:"not"},
+    {han:"很", pinyin:"hěn", en:"very"},
+    {han:"吗", pinyin:"ma", en:"(question particle)"},
+    {han:"呢", pinyin:"ne", en:"(topic particle)"},
+    {han:"的", pinyin:"de", en:"(possession particle)"},
+    {han:"是", pinyin:"shì", en:"to be"},
+    {han:"有", pinyin:"yǒu", en:"to have"},
+    {han:"在", pinyin:"zài", en:"to be at / in"},
+    {han:"去", pinyin:"qù", en:"to go"},
+    {han:"来", pinyin:"lái", en:"to come"},
+    {han:"吃", pinyin:"chī", en:"to eat"},
+    {han:"喝", pinyin:"hē", en:"to drink"},
+    {han:"看", pinyin:"kàn", en:"to see / watch"},
+    {han:"听", pinyin:"tīng", en:"to listen"},
+    {han:"说", pinyin:"shuō", en:"to speak"},
+    {han:"学", pinyin:"xué", en:"to learn"},
+    {han:"买", pinyin:"mǎi", en:"to buy"},
+    {han:"钱", pinyin:"qián", en:"money"},
+    {han:"人", pinyin:"rén", en:"person"},
+    {han:"家", pinyin:"jiā", en:"home / family"},
+    {han:"水", pinyin:"shuǐ", en:"water"},
+    {han:"茶", pinyin:"chá", en:"tea"},
+    {han:"米饭", pinyin:"mǐfàn", en:"rice (cooked)"},
+    {han:"苹果", pinyin:"píngguǒ", en:"apple"},
+    {han:"老师", pinyin:"lǎoshī", en:"teacher"},
+    {han:"学生", pinyin:"xuésheng", en:"student"},
+    {han:"中国", pinyin:"Zhōngguó", en:"China"},
+    {han:"法国", pinyin:"Fǎguó", en:"France"},
+    {han:"今天", pinyin:"jīntiān", en:"today"},
+    {han:"明天", pinyin:"míngtiān", en:"tomorrow"},
+    {han:"现在", pinyin:"xiànzài", en:"now"},
+    {han:"多少", pinyin:"duōshao", en:"how many / how much"},
+  ],
+  "超市主题（示例 20）": [
+    {han:"超市", pinyin:"chāoshì", en:"supermarket"},
+    {han:"买", pinyin:"mǎi", en:"to buy"},
+    {han:"卖", pinyin:"mài", en:"to sell"},
+    {han:"钱", pinyin:"qián", en:"money"},
+    {han:"贵", pinyin:"guì", en:"expensive"},
+    {han:"便宜", pinyin:"piányi", en:"cheap"},
+    {han:"水", pinyin:"shuǐ", en:"water"},
+    {han:"牛奶", pinyin:"niúnǎi", en:"milk"},
+    {han:"面包", pinyin:"miànbāo", en:"bread"},
+    {han:"米饭", pinyin:"mǐfàn", en:"rice"},
+    {han:"鸡蛋", pinyin:"jīdàn", en:"egg"},
+    {han:"苹果", pinyin:"píngguǒ", en:"apple"},
+    {han:"香蕉", pinyin:"xiāngjiāo", en:"banana"},
+    {han:"肉", pinyin:"ròu", en:"meat"},
+    {han:"菜", pinyin:"cài", en:"vegetable / dish"},
+    {han:"一", pinyin:"yī", en:"one"},
+    {han:"二", pinyin:"èr", en:"two"},
+    {han:"三", pinyin:"sān", en:"three"},
+    {han:"四", pinyin:"sì", en:"four"},
+    {han:"五", pinyin:"wǔ", en:"five"},
+  ]
+};
 
-        function flipCard(el, card) {
-            if (flippedCards.length < 2 && !el.classList.contains('flipped')) {
-                el.classList.add('flipped');
-                el.innerHTML = `<span>${card.text}</span>`;
-                flippedCards.push({ el, card });
+let state = {
+  view: "vocab",
+  deckName: Object.keys(DECKS)[0],
+  items: [],
+  index: 0,
+  showPinyin: true,
+  showEnglish: true,
+  flipped: false,
+  showDone: true,
+  filtered: null,
+  quiz: { q:null, options:[], correctIndex:0, score:0, total:0, mode:"han->pinyin" }
+};
 
-                if (flippedCards.length === 2) {
-                    attempts++;
-                    document.getElementById('attempts').innerText = attempts;
-                    checkMatch();
-                }
-            }
-        }
+const $ = (sel)=>document.querySelector(sel);
+const mainCard = $("#mainCard");
+const deckSelect = $("#deckSelect");
+const searchInput = $("#search");
 
-        function checkMatch() {
-            const [c1, c2] = flippedCards;
-            if (c1.card.matchId === c2.card.matchId) {
-                score++;
-                document.getElementById('score').innerText = score;
-                // 播放发音
-                speak(c1.card.matchId);
-                setTimeout(() => {
-                    c1.el.classList.add('matched');
-                    c2.el.classList.add('matched');
-                    flippedCards = [];
-                    if (score === vocabulary.length) alert('太棒了！你完成了挑战！');
-                }, 600);
-            } else {
-                setTimeout(() => {
-                    c1.el.classList.remove('flipped');
-                    c2.el.classList.remove('flipped');
-                    c1.el.innerHTML = `<span>?</span>`;
-                    c2.el.innerHTML = `<span>?</span>`;
-                    flippedCards = [];
-                }, 1000);
-            }
-        }
+function cloneDeck(name){
+  return DECKS[name].map(x=>({ ...x, done:false }));
+}
 
-        function speak(text) {
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'zh-CN';
-            window.speechSynthesis.speak(msg);
-        }
+function currentList(){
+  return state.filtered ?? state.items;
+}
 
-        createBoard();
-    </script>
+function currentItem(){
+  const list = currentList();
+  return list[state.index] ?? null;
+}
+
+function clampIndex(){
+  const list = currentList();
+  if(list.length === 0){ state.index = 0; return; }
+  if(state.index < 0) state.index = list.length-1;
+  if(state.index >= list.length) state.index = 0;
+}
+
+function setToast(msg){
+  alert(msg);
+}
+
+function render(){
+  clampIndex();
+  renderDeckSelect();
+  renderView();
+  renderPills();
+}
+
+function renderPills(){
+  document.querySelectorAll(".pill[data-view]").forEach(p=>{
+    p.classList.toggle("active", p.dataset.view===state.view);
+  });
+}
+
+function renderDeckSelect(){
+  const names = Object.keys(DECKS);
+  if(deckSelect.options.length !== names.length){
+    deckSelect.innerHTML = names.map(n=>`<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join("");
+  }
+  deckSelect.value = state.deckName;
+}
+
+function escapeHtml(s){
+  return (s??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+}
+
+function goto(delta){
+  state.flipped = false;
+  state.index += delta;
+  render();
+}
+
+function shuffle(arr){
+  for(let i=arr.length-1; i>0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+/** ========= Views ========= */
+function renderView(){
+  if(state.view==="vocab") return renderVocab();
+  if(state.view==="dictation") return renderDictation();
+  if(state.view==="writing") return renderWriting();
+  if(state.view==="quiz") return renderQuiz();
+  if(state.view==="custom") return renderCustom();
+}
+
+function renderVocab(){
+  const it = currentItem();
+  const list = currentList();
+  if(!it){
+    mainCard.innerHTML = `<h2>📚 词汇卡</h2><p class="muted">当前没有词。请切换词库或在“自定义词库”里添加。</p>`;
+    return;
+  }
+  mainCard.innerHTML = `
+    <h2>📚 词汇卡</h2>
+    <div class="flash" id="flash">
+      <div class="muted" style="font-size:12px;">第 ${state.index+1} / ${list.length} 个</div>
+      <div class="bigHan">${escapeHtml(it.han)}</div>
+      <div class="small">
+        <div>${state.showPinyin ? `<b>Pinyin:</b> ${escapeHtml(it.pinyin)}` : `<b>Pinyin:</b> <span class="muted">（隐藏）</span>`}</div>
+        <div>${state.showEnglish ? `<b>EN:</b> ${escapeHtml(it.en)}` : `<b>EN:</b> <span class="muted">（隐藏）</span>`}</div>
+      </div>
+      <div class="meta">
+        <span class="chip">点击卡片可“翻面”</span>
+        <span class="chip">${it.done ? "✅ 已掌握" : "⬜ 未掌握"}</span>
+      </div>
+      <div class="row" style="margin-top:12px;">
+        <button class="btn" id="prev">← 上一个</button>
+        <button class="btn" id="flip">Space 翻面</button>
+        <button class="btn" id="next">下一个 →</button>
+        <button class="btn ok" id="mark">${it.done ? "取消掌握" : "标记掌握"}</button>
+      </div>
+      <div class="hint">建议：先读拼音→再看中文→最后遮住英文复述。</div>
+    </div>
+  `;
+  $("#prev").onclick = ()=>goto(-1);
+  $("#next").onclick = ()=>goto(1);
+  $("#flip").onclick = ()=>{ state.flipped = !state.flipped; applyFlipVocab(); };
+  $("#mark").onclick = ()=>{
+    it.done = !it.done;
+    render();
+  };
+  $("#flash").onclick = (e)=>{
+    // avoid double trigger when clicking buttons
+    if(e.target.tagName==="BUTTON") return;
+    state.flipped = !state.flipped;
+    applyFlipVocab();
+  };
+  applyFlipVocab();
+}
+
+function applyFlipVocab(){
+  // 翻面：隐藏/显示拼音 & 英文（不改总开关，只在卡片层做“遮住”）
+  const it = currentItem();
+  if(!it) return;
+  // flipped = true => hide pinyin/en regardless toggles
+  const showP = state.showPinyin && !state.flipped;
+  const showE = state.showEnglish && !state.flipped;
+  mainCard.querySelector(".small").innerHTML = `
+    <div>${showP ? `<b>Pinyin:</b> ${escapeHtml(it.pinyin)}` : `<b>Pinyin:</b> <span class="muted">（翻面隐藏）</span>`}</div>
+    <div>${showE ? `<b>EN:</b> ${escapeHtml(it.en)}` : `<b>EN:</b> <span class="muted">（翻面隐藏）</span>`}</div>
+  `;
+}
+
+function renderDictation(){
+  const it = currentItem();
+  const list = currentList();
+  if(!it){
+    mainCard.innerHTML = `<h2>✍️ 默写</h2><p class="muted">当前没有词。</p>`;
+    return;
+  }
+  const prompt = state.flipped
+    ? `<div class="bigHan">${escapeHtml(it.han)}</div>`
+    : `
+      <div class="bigHan">❓</div>
+      <div class="small">
+        <div><b>Pinyin:</b> ${escapeHtml(it.pinyin)}</div>
+        <div><b>EN:</b> ${escapeHtml(it.en)}</div>
+      </div>
+    `;
+  mainCard.innerHTML = `
+    <h2>✍️ 默写</h2>
+    <div class="flash">
+      <div class="muted" style="font-size:12px;">第 ${state.index+1} / ${list.length} 个</div>
+      ${prompt}
+      <div class="row" style="margin-top:12px;">
+        <button class="btn" id="prev">← 上一个</button>
+        <button class="btn primary" id="reveal">Space 显示答案</button>
+        <button class="btn" id="next">下一个 →</button>
+      </div>
+      <div class="hint">玩法：先在纸上写出来，再点“显示答案”对照。</div>
+    </div>
+  `;
+  $("#prev").onclick = ()=>goto(-1);
+  $("#next").onclick = ()=>goto(1);
+  $("#reveal").onclick = ()=>{ state.flipped = !state.flipped; renderDictation(); };
+}
+
+let pad = null;
+
+function renderWriting(){
+  const it = currentItem();
+  const list = currentList();
+  mainCard.innerHTML = `
+    <h2>🖊 写字板（米字格）</h2>
+    <div class="muted" style="font-size:13px; margin-bottom:10px;">
+      练习词：<b>${escapeHtml(it?.han ?? "（未选择）")}</b>
+      <span class="muted">（第 ${Math.min(state.index+1, list.length)} / ${list.length || 0}）</span>
+    </div>
+
+    <div class="padWrap">
+      <div class="padTop">
+        <div class="row">
+          <label>笔粗</label>
+          <input id="size" type="range" min="2" max="18" value="8" />
+          <span class="chip" id="sizeLabel">8</span>
+        </div>
+        <div class="row">
+          <button class="btn" id="undo">撤销</button>
+          <button class="btn danger" id="clear">清空</button>
+          <button class="btn" id="prev">← 上一个</button>
+          <button class="btn" id="next">下一个 →</button>
+        </div>
+      </div>
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="hint">
+      小建议：让学生先读拼音，再一笔一划写。你也可以让他每写完一次就“撤销”重写一遍练手感。
+    </div>
+  `;
+
+  $("#prev").onclick = ()=>goto(-1);
+  $("#next").onclick = ()=>goto(1);
+
+  initPad();
+}
+
+function initPad(){
+  const canvas = $("#canvas");
+  const ctx = canvas.getContext("2d");
+  // fit for device pixel ratio
+  function resize(){
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.floor(rect.width * dpr);
+    canvas.height = Math.floor(rect.height * dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    drawGrid(ctx, rect.width, rect.height);
+    pad?.redraw(ctx);
+  }
+  // Pad object
+  pad = makePad();
+  resize();
+  window.addEventListener("resize", resize, {passive:true});
+
+  let drawing = false;
+  let last = null;
+
+  function getPos(e){
+    const rect = canvas.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+  }
+
+  function start(e){
+    e.preventDefault();
+    drawing = true;
+    last = getPos(e);
+    pad.beginStroke(last);
+  }
+  function move(e){
+    if(!drawing) return;
+    e.preventDefault();
+    const p = getPos(e);
+    pad.addPoint(p);
+    last = p;
+    // redraw
+    const rect = canvas.getBoundingClientRect();
+    drawGrid(ctx, rect.width, rect.height);
+    pad.redraw(ctx);
+  }
+  function end(e){
+    if(!drawing) return;
+    e.preventDefault();
+    drawing = false;
+    pad.endStroke();
+  }
+
+  canvas.addEventListener("mousedown", start);
+  canvas.addEventListener("mousemove", move);
+  window.addEventListener("mouseup", end);
+
+  canvas.addEventListener("touchstart", start, {passive:false});
+  canvas.addEventListener("touchmove", move, {passive:false});
+  window.addEventListener("touchend", end, {passive:false});
+
+  const size = $("#size");
+  const sizeLabel = $("#sizeLabel");
+  size.oninput = ()=>{
+    sizeLabel.textContent = size.value;
+    pad.setWidth(parseInt(size.value,10));
+  };
+
+  $("#clear").onclick = ()=>{
+    pad.clear();
+    const rect = canvas.getBoundingClientRect();
+    drawGrid(ctx, rect.width, rect.height);
+  };
+  $("#undo").onclick = ()=>{
+    pad.undo();
+    const rect = canvas.getBoundingClientRect();
+    drawGrid(ctx, rect.width, rect.height);
+    pad.redraw(ctx);
+  };
+
+  // initial width
+  pad.setWidth(parseInt(size.value,10));
+  // initial draw
+  const rect = canvas.getBoundingClientRect();
+  drawGrid(ctx, rect.width, rect.height);
+}
+
+function drawGrid(ctx, w, h){
+  // background
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle = "#0a1020";
+  ctx.fillRect(0,0,w,h);
+
+  // grid lines
+  ctx.strokeStyle = "rgba(255,255,255,.10)";
+  ctx.lineWidth = 1;
+
+  // outer border
+  ctx.strokeRect(10,10,w-20,h-20);
+
+  // center cross
+  ctx.beginPath();
+  ctx.moveTo(w/2, 10); ctx.lineTo(w/2, h-10);
+  ctx.moveTo(10, h/2); ctx.lineTo(w-10, h/2);
+  ctx.stroke();
+
+  // diagonals
+  ctx.strokeStyle = "rgba(255,255,255,.06)";
+  ctx.beginPath();
+  ctx.moveTo(10,10); ctx.lineTo(w-10,h-10);
+  ctx.moveTo(w-10,10); ctx.lineTo(10,h-10);
+  ctx.stroke();
+
+  // faint text watermark: current word
+  const it = currentItem();
+  if(it?.han){
+    ctx.fillStyle = "rgba(255,255,255,.07)";
+    ctx.font = "bold 160px system-ui";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(it.han, w/2, h/2);
+  }
+}
+
+function makePad(){
+  let strokes = []; // each stroke = {points:[], width}
+  let current = null;
+  let width = 8;
+
+  function beginStroke(p){
+    current = { points:[p], width };
+    strokes.push(current);
+  }
+  function addPoint(p){
+    if(!current) return;
+    current.points.push(p);
+  }
+  function endStroke(){ current = null; }
+  function setWidth(w){ width = w; if(current) current.width = w; }
+  function clear(){ strokes = []; current=null; }
+  function undo(){ strokes.pop(); current=null; }
+
+  function redraw(ctx){
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    for(const s of strokes){
+      const pts = s.points;
+      if(pts.length===0) continue;
+      ctx.strokeStyle = "rgba(230,238,252,.95)";
+      ctx.lineWidth = s.width;
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for(let i=1;i<pts.length;i++){
+        ctx.lineTo(pts[i].x, pts[i].y);
+      }
+      ctx.stroke();
+    }
+  }
+
+  return { beginStroke, addPoint, endStroke, setWidth, clear, undo, redraw };
+}
+
+function renderQuiz(){
+  mainCard.innerHTML = `
+    <h2>🧠 小测验（选择题）</h2>
+    <div class="row" style="margin-bottom:10px;">
+      <button class="btn ${state.quiz.mode==="han->pinyin" ? "primary":""}" id="m1">看中文选拼音</button>
+      <button class="btn ${state.quiz.mode==="han->en" ? "primary":""}" id="m2">看中文选英文</button>
+      <button class="btn" id="newQ">出一题</button>
+      <button class="btn ok" id="resetQ">清零</button>
+    </div>
+    <div class="qBox" id="qBox"></div>
+  `;
+
+  $("#m1").onclick = ()=>{ state.quiz.mode="han->pinyin"; newQuestion(); };
+  $("#m2").onclick = ()=>{ state.quiz.mode="han->en"; newQuestion(); };
+  $("#newQ").onclick = ()=>newQuestion();
+  $("#resetQ").onclick = ()=>{ state.quiz.score=0; state.quiz.total=0; newQuestion(); };
+
+  if(!state.quiz.q) newQuestion();
+  else paintQuestion();
+}
+
+function newQuestion(){
+  const list = currentList();
+  if(list.length < 4){
+    $("#qBox").innerHTML = `<p class="muted">词太少啦（至少需要 4 个词）。换个词库或添加自定义词。</p>`;
+    return;
+  }
+  const qIndex = Math.floor(Math.random()*list.length);
+  const q = list[qIndex];
+
+  // build options
+  const indices = new Set([qIndex]);
+  while(indices.size < 4){
+    indices.add(Math.floor(Math.random()*list.length));
+  }
+  const opts = [...indices].map(i=>list[i]);
+
+  // shuffle options
+  const shuffled = shuffle(opts.slice());
+  const correctIndex = shuffled.findIndex(x=>x.han===q.han);
+
+  state.quiz.q = q;
+  state.quiz.options = shuffled;
+  state.quiz.correctIndex = correctIndex;
+  paintQuestion(true);
+}
+
+function paintQuestion(fresh=false){
+  const q = state.quiz.q;
+  if(!q){
+    $("#qBox").innerHTML = `<p class="muted">点“出一题”开始。</p>`;
+    return;
+  }
+  const ask = `<div class="muted" style="font-size:12px;">题目：选择正确的 ${state.quiz.mode==="han->pinyin" ? "拼音" : "英文"}</div>
+               <div class="bigHan" style="margin-top:10px;">${escapeHtml(q.han)}</div>`;
+  const optsHtml = state.quiz.options.map((o, idx)=>{
+    const label = state.quiz.mode==="han->pinyin" ? o.pinyin : o.en;
+    return `<div class="opt" data-idx="${idx}">${escapeHtml(label)}</div>`;
+  }).join("");
+
+  $("#qBox").innerHTML = `
+    ${ask}
+    ${optsHtml}
+    <div class="score">
+      <div>得分：<b>${state.quiz.score}</b> / ${state.quiz.total}</div>
+      <div class="muted">提示：答完自动出下一题</div>
+    </div>
+  `;
+
+  document.querySelectorAll(".opt").forEach(el=>{
+    el.onclick = ()=>{
+      const idx = parseInt(el.dataset.idx,10);
+      const correct = idx === state.quiz.correctIndex;
+      state.quiz.total += 1;
+      if(correct) state.quiz.score += 1;
+
+      // mark
+      document.querySelectorAll(".opt").forEach((oEl)=>{
+        const i = parseInt(oEl.dataset.idx,10);
+        if(i === state.quiz.correctIndex) oEl.classList.add("good");
+        else if(i === idx) oEl.classList.add("bad");
+        oEl.style.pointerEvents = "none";
+      });
+
+      setTimeout(()=>newQuestion(), 650);
+    };
+  });
+}
+
+function renderCustom(){
+  mainCard.innerHTML = `
+    <h2>🧩 自定义词库</h2>
+    <p class="muted" style="margin-top:0;">
+      你可以把课堂词直接粘进来。格式：每行一个词，三列用逗号分隔：<br/>
+      <span class="kbd">中文, pinyin, English</span>
+    </p>
+
+    <div class="split" style="margin-top:10px;">
+      <div>
+        <div class="muted" style="font-size:12px; margin-bottom:6px;">新词库名称</div>
+        <input id="newDeckName" type="text" placeholder="例如：HSK1 Week 1 (Chaoze)" />
+        <div class="muted" style="font-size:12px; margin:12px 0 6px;">粘贴词表</div>
+        <textarea id="newDeckText" placeholder="例如：
+你好, nǐ hǎo, hello
+谢谢, xièxie, thanks
+再见, zàijiàn, goodbye"></textarea>
+        <div class="row" style="margin-top:10px;">
+          <button class="btn primary" id="importDeck">导入为新词库</button>
+          <button class="btn danger" id="wipeCustom">清空输入</button>
+        </div>
+      </div>
+      <div>
+        <div class="muted" style="font-size:12px; margin-bottom:6px;">快速生成模板</div>
+        <div class="flash">
+          <div class="small">
+            你也可以把你之前让我做的表格（中文/拼音/英文）按行粘贴进来。
+            <br/>导入后会自动出现在右侧“词库”下拉框中。
+          </div>
+          <div class="row" style="margin-top:12px;">
+            <button class="btn" id="fillSample">填入示例</button>
+            <button class="btn" id="switchToDeck">切到新词库</button>
+          </div>
+          <div class="hint">注意：这是本地版（不联网）。如果你要多人共享，可以把导入后的词库写回代码，或者我可以帮你做“上传/云端保存”。</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  $("#wipeCustom").onclick = ()=> $("#newDeckText").value = "";
+  $("#fillSample").onclick = ()=>{
+    $("#newDeckName").value = "HSK1 - Greeting Pack";
+    $("#newDeckText").value =
+`你好, nǐ hǎo, hello
+谢谢, xièxie, thanks
+不客气, bú kèqi, you're welcome
+再见, zàijiàn, goodbye
+对不起, duìbuqǐ, sorry
+没关系, méi guānxi, it's okay`;
+  };
+
+  $("#importDeck").onclick = ()=>{
+    const name = ($("#newDeckName").value || "").trim();
+    const text = ($("#newDeckText").value || "").trim();
+    if(!name){ setToast("请先填写词库名称"); return; }
+    if(!text){ setToast("请先粘贴词表"); return; }
+
+    const lines = text.split("\n").map(x=>x.trim()).filter(Boolean);
+    const items = [];
+    for(const line of lines){
+      const parts = line.split(",").map(x=>x.trim());
+      if(parts.length < 3){
+        setToast(`格式不对：${line}\n需要：中文, pinyin, English`);
+        return;
+      }
+      items.push({ han: parts[0], pinyin: parts[1], en: parts.slice(2).join(", "), done:false });
+    }
+    DECKS[name] = items;
+    state.deckName = name;
+    state.items = cloneDeck(name);
+    state.filtered = null;
+    state.index = 0;
+    setToast(`已导入：${name}（${items.length} 个词）`);
+    render();
+  };
+
+  $("#switchToDeck").onclick = ()=>{
+    state.deckName = $("#newDeckName").value.trim() || state.deckName;
+    render();
+  };
+}
+
+/** ========= Controls ========= */
+document.querySelectorAll(".pill[data-view]").forEach(p=>{
+  p.onclick = ()=>{
+    state.view = p.dataset.view;
+    state.flipped = false;
+    render();
+  };
+});
+
+deckSelect.onchange = ()=>{
+  state.deckName = deckSelect.value;
+  state.items = cloneDeck(state.deckName);
+  state.filtered = null;
+  state.index = 0;
+  state.flipped = false;
+  state.quiz.q = null;
+  render();
+};
+
+$("#togglePinyin").onclick = ()=>{
+  state.showPinyin = !state.showPinyin;
+  $("#togglePinyin").textContent = `👀 拼音：${state.showPinyin ? "显示":"隐藏"}`;
+  render();
+};
+$("#toggleEnglish").onclick = ()=>{
+  state.showEnglish = !state.showEnglish;
+  $("#toggleEnglish").textContent = `👀 英文：${state.showEnglish ? "显示":"隐藏"}`;
+  render();
+};
+
+$("#shuffle").onclick = ()=>{
+  state.items = shuffle(state.items);
+  state.filtered = null;
+  state.index = 0;
+  state.flipped = false;
+  state.quiz.q = null;
+  render();
+};
+
+$("#reset").onclick = ()=>{
+  state.items = cloneDeck(state.deckName);
+  state.filtered = null;
+  state.index = 0;
+  state.flipped = false;
+  state.quiz.q = null;
+  render();
+};
+
+searchInput.oninput = ()=>{
+  const q = searchInput.value.trim().toLowerCase();
+  if(!q){
+    state.filtered = null;
+    state.index = 0;
+    render();
+    return;
+  }
+  state.filtered = state.items.filter(it=>{
+    return (it.han||"").toLowerCase().includes(q)
+      || (it.pinyin||"").toLowerCase().includes(q)
+      || (it.en||"").toLowerCase().includes(q);
+  });
+  state.index = 0;
+  state.flipped = false;
+  render();
+};
+
+$("#printSheet").onclick = ()=>{
+  const list = currentList();
+  if(list.length===0){ setToast("当前没有词"); return; }
+  const repeat = parseInt($("#repeatCount").value,10);
+  const html = makePrintHtml(list, repeat);
+  const w = window.open("", "_blank");
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+};
+
+function makePrintHtml(list, repeat){
+  const rows = list.map(it=>{
+    const boxes = Array.from({length: repeat}).map(()=>`<div class="box"></div>`).join("");
+    return `
+      <div class="row">
+        <div class="word">${escapeHtml(it.han)}</div>
+        <div class="meta">${escapeHtml(it.pinyin)} · ${escapeHtml(it.en)}</div>
+        <div class="boxes">${boxes}</div>
+      </div>
+    `;
+  }).join("");
+
+  return `
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HSK1 练字纸</title>
+<style>
+  @page{ size: A4; margin: 14mm; }
+  body{ font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+  h1{ font-size: 16px; margin: 0 0 8px; }
+  .note{ font-size:12px; color:#444; margin:0 0 12px; }
+  .row{
+    border:1px solid #ddd; border-radius:10px;
+    padding:10px; margin-bottom:10px;
+  }
+  .word{ font-size: 28px; font-weight: 800; }
+  .meta{ font-size: 12px; color:#555; margin-top:2px; }
+  .boxes{ display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .box{
+    width:34px; height:34px; border:1px solid #bbb; border-radius:6px;
+    background:
+      linear-gradient(#fff,#fff),
+      linear-gradient(to right, rgba(0,0,0,.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0,0,0,.08) 1px, transparent 1px);
+    background-size: 100% 100%, 50% 100%, 100% 50%;
+    background-position: 0 0, 0 0, 0 0;
+  }
+</style>
+</head>
+<body>
+  <h1>HSK1 练字纸（${escapeHtml(state.deckName)}）</h1>
+  <p class="note">建议：先读拼音，再写字。每个格写一次。</p>
+  ${rows}
+  <script>window.print();</script>
+</body>
+</html>`;
+}
+
+/** ========= Keyboard ========= */
+window.addEventListener("keydown", (e)=>{
+  if(e.key === "ArrowLeft") goto(-1);
+  if(e.key === "ArrowRight") goto(1);
+  if(e.key === " "){
+    // Space toggles flip in vocab/dictation
+    if(state.view === "vocab"){
+      state.flipped = !state.flipped;
+      applyFlipVocab();
+      e.preventDefault();
+    }else if(state.view === "dictation"){
+      state.flipped = !state.flipped;
+      renderDictation();
+      e.preventDefault();
+    }
+  }
+});
+
+/** ========= Init ========= */
+function init(){
+  // setup
+  state.items = cloneDeck(state.deckName);
+  $("#togglePinyin").textContent = `👀 拼音：显示`;
+  $("#toggleEnglish").textContent = `👀 英文：显示`;
+  render();
+}
+init();
+</script>
 </body>
 </html>
